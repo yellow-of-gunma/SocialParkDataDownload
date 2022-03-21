@@ -7,6 +7,5 @@
 3. gem install nokogiri
 
 ## 実行方法
-ruby socialPark.rb
-mail と出てきたらメールアドレスを入力
-password と出てきたらパスワードを入力
+1. プログラム中にメールアドレスとパスワードを記入
+2. ruby socialPark.rb
