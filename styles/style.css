@@ -1,0 +1,12 @@
+header {
+  width: 100%;
+  text-align: center;
+  background-color:cadetblue;
+  color: white
+}
+header .headline{
+  font-size: 24px;
+}
+header .header-button{
+  float: right;
+}
