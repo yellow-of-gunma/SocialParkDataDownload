@@ -10,6 +10,11 @@ mail = 'ここにメールアドレスを入力'
 pass = 'ここにパスワードを入力'
 login_page_url = 'http://mckees.sns-park.com/?m=portal&a=page_user_top'
 
+# 「最新日記」の何ページ目から何ページ目までを取得するか
+# (1-index, closed interval)
+traverse_start_index = 1
+traverse_end_index = 10000000
+
 # windowリサイズ
 # ページが読み込めているかの判定＆ページが読み込めるまでのwaitにも利用
 def window_resize(driver)
@@ -39,6 +44,39 @@ def window_resize(driver)
     driver.manage.window.resize_to(width+100, height+100)
 end
 
+# 表示されているページの日記リンクを一通り踏んでデータを取得する
+def traverse_diary(driver)
+    # 表示されている日記リンクの数の半分の値を計算
+    # 1つの日記に対してリンクが2つ存在するため
+    diary_size = driver.find_elements(:xpath, "//a[contains(@href,'target_c_diary_id=')]").size() / 2
+
+    # リンクの数だけループ
+    for i in 0..diary_size-1
+        # 2回目以降のループ処理の際にドライバがなくなってるので、再度ドライバ指定
+        events_in_loop = driver.find_elements(:xpath, "//a[contains(@href,'target_c_diary_id=')]")
+
+        # 日記に移動し情報を解析
+        events_in_loop[i*2].click()
+        window_resize(driver)
+        doc = Nokogiri::HTML(driver.page_source.toutf8, nil, 'utf-8')
+
+        # ファイル名の指定
+        filename = "hoge" + i.to_s
+
+        # CSV化したデータを出力
+        File.open('diary/csv/' + filename + '.html','w', :encoding => "utf-8") do |writter|
+            writter.puts(doc)
+        end
+
+        # スクリーンショットを保存
+        driver.save_screenshot('diary/screenshot/' + filename + '.png')
+
+        # 前のページに戻る
+        driver.navigate.back
+        window_resize(driver)
+    end
+end
+
 # WebDriverの生成
 # Chromeをヘッドレス起動
 options = Selenium::WebDriver::Chrome::Options.new(
@@ -56,39 +94,34 @@ wd.find_element(:id, 'buttonLogin').click
 
 # 最新日記のページに移動
 wd.find_element(:xpath, "//a[contains(@href,'a=page_h_diary_list_all')]").click
-window_resize(wd)
 
-# 表示されている日記リンクの数の半分の値を計算
-# 1つの日記に対してリンクが2つ存在するため
-diary_size = wd.find_elements(:xpath, "//a[contains(@href,'target_c_diary_id=')]").size() / 2
-
-# リンクの数だけループ
-for i in 0..diary_size-1
-    # 2回目以降のループ処理の際にドライバがなくなってるので、再度ドライバ指定
-    events_in_loop = wd.find_elements(:xpath, "//a[contains(@href,'target_c_diary_id=')]")
-
-    # 日記に移動し情報を解析
-    events_in_loop[i*2].click()
-    window_resize(wd)
-
-    p "index:" + i.to_s
-
-    doc = Nokogiri::HTML(wd.page_source.toutf8, nil, 'utf-8')
-
-    # ファイル名の指定
-    filename = "hoge" + i.to_s
-
-    # CSV化したデータを出力
-    File.open('diary/csv/' + filename + '.html','w', :encoding => "utf-8") do |writter|
-        writter.puts(doc)
+# 最新日記一覧を1ページずつめくっていく
+index = 1
+loop do
+    # 取得範囲の終端を迎えたら終了
+    if index > traverse_end_index
+        break
     end
 
-    # スクリーンショットを保存
-    wd.save_screenshot('diary/screenshot/' + filename + '.png')
-
-    # 前のページに戻る
-    wd.navigate.back
+    # 今のページがちゃんと表示されていることを確認
+    puts "\n【INFO】DiaryIndex: " + index.to_s + "\n\n"
+    sleep 0.5
     window_resize(wd)
+
+    # 取得範囲の先端を迎えていたら、
+    # 表示されているページの日記リンクを一通り踏んでデータを取得する
+    if index >= traverse_start_index
+        traverse_diary(wd)
+    end
+
+    # 次のページがあれば遷移し、なければ終了
+    index += 1
+    begin
+        nextElement = wd.find_element(:class, 'next')
+        nextElement.find_element(:tag_name, 'a').click
+    rescue
+        break
+    end
 end
 
 # 終了
