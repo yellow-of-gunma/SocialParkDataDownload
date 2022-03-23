@@ -207,12 +207,30 @@ def traverse(driver)
         events_in_loop[i*2].click
         on_open_new_page(driver)
 
-        # 保存
-        save_data(driver)
+        # トピックは複数ページに分割されていることがあるので、
+        # すべて舐められるようにループ
+        page = 0
+        loop do
+            page += 1
 
-        # 前のページに戻る
-        driver.navigate.back
-        on_open_new_page(driver)
+            # 保存
+            save_data(driver)
+    
+            # 前のページがあれば遷移し、なければ終了
+            begin
+                nextElement = driver.find_element(:class, 'prev')
+                nextElement.find_element(:tag_name, 'a').click
+                on_open_new_page(driver)
+            rescue
+                break
+            end
+        end
+
+        # 進んだだけ前のページに戻る
+        for j in 1..page do
+            driver.navigate.back
+            on_open_new_page(driver)
+        end
     end
 end
 

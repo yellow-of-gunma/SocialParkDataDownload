@@ -38,5 +38,6 @@ def main()
     end
 
     # 終了
+    print_log("【INFO】正常に終了しました")
     driver.quit
 end
