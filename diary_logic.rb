@@ -3,11 +3,8 @@ require "csv"
 require "./common_logic.rb"
 
 # ページのhtmlを解析してデータ化する
-def parse_html(doc, current_url)
+def parse_html(doc)
     data = {}
-
-    # ID
-    data[:id] = Hash[URI::decode_www_form((URI::parse(current_url)).query)]["target_c_diary_id"]
 
     # 本文領域
     center = doc.css('#Center')[0]
@@ -105,7 +102,8 @@ end
 def save_data(driver)
     # ページの情報を解析
     doc = Nokogiri::HTML(driver.page_source.toutf8, nil, 'utf-8')
-    data = parse_html(doc, driver.current_url)
+    data = parse_html(doc)
+    data[:id] = Hash[URI::decode_www_form((URI::parse(driver.current_url)).query)]["target_c_diary_id"]
 
     # ファイル名の決定
     filename = get_filename(data)
@@ -143,15 +141,15 @@ def save_data(driver)
         diary_data.push(0) #number
         diary_data.push(data[:date][:year] + '/' + data[:date][:month] + '/' + data[:date][:day]) #date
         diary_data.push(data[:date][:hour] + ':' + data[:date][:minute]) #time
-        diary_data.push(data[:user].gsub(",", "")) #user
-        diary_data.push(data[:title].gsub(",", "")) #title
-        diary_data.push(data[:body][:text].gsub(",", "")) #body_text
-        diary_data.push(data[:body][:html].gsub(",", "")) #body_html
+        diary_data.push(data[:user]) #user
+        diary_data.push(data[:title]) #title
+        diary_data.push(data[:body][:text]) #body_text
+        diary_data.push(data[:body][:html]) #body_html
         for i in 0..2 do
             diary_data.push(data[:photo].length > i ? data[:photo][i] : "") #photo
         end
         for i in 0..9 do
-            diary_data.push(data[:like].length > i ? data[:like][i].gsub(",", "") : "") #like
+            diary_data.push(data[:like].length > i ? data[:like][i] : "") #like
         end
         diary_data.push(data[:like].length > 10) #like_over
         writter.puts(diary_data)
@@ -162,9 +160,9 @@ def save_data(driver)
             comment_data.push(comm[:id]) #number
             comment_data.push(comm[:date][:year] + '/' + comm[:date][:month] + '/' + comm[:date][:day]) #date
             comment_data.push(comm[:date][:hour] + ':' + comm[:date][:minute]) #time
-            comment_data.push(comm[:user].gsub(",", "")) #user
+            comment_data.push(comm[:user]) #user
             comment_data.push("") #title
-            comment_data.push(comm[:body].gsub(",", "")) #body_text
+            comment_data.push(comm[:body]) #body_text
             comment_data.push("") #body_html
             for i in 0..2 do
                 comment_data.push(comm[:photo].length > i ? comm[:photo][i] : "") #photo
