@@ -1,7 +1,8 @@
 # SocialParkDataDownload
+- 2022/3/31にそーしゃるぱーくがサービスを終了するので作りました
 
 ## 概要
-- そーしゃるぱーくのSNS上にあがっている日記のデータを全部ダウンロードします
+- そーしゃるぱーくのSNS上から、日記とトピックのデータを全部ローカルに保存します
   - 対象ページ1つにつき以下の3つがローカルに生成されます
     - csv化されたデータ
     - 画面のスクリーンショット
@@ -18,21 +19,34 @@
   - https://sites.google.com/chromium.org/driver/downloads
   - 自分のパソコンに入っているChromeのバージョンと同じバージョンのものをダウンロードすること
   - ruby.exeの場所は、コマンドプロンプトで以下のコマンドを打てば分かる
-    - [windowsの場合] where.exe ruby
-    - [maxの場合] which ruby
+    - [windowsの場合] `where.exe ruby`
+    - [maxの場合] `which ruby`
 - コマンドプロンプトで以下の3つを実行し、ライブラリをインストール
-  - gem install nokogiri
-  - gem install selenium-webdriver
-  - gem install ffi
-- このプロジェクトのディレクトリに「diary」フォルダを作成
-- 「diary」フォルダの下に「asset」「csv」「screenshot」の3つのフォルダを作成
+  - `gem install nokogiri`
+  - `gem install selenium-webdriver`
+  - `gem install ffi`
+- このプロジェクトのディレクトリに`diary`フォルダと`topic`フォルダを作成
+- `diary` `topic`の両フォルダの下にそれぞれ`asset` `csv` `screenshot`の3つのフォルダを作成
+
+## そーしゃるぱーく上での準備
+- マイホームに「全体の最新コミュニティ書き込み」が表示されていることを確認
+  - 表示されていない場合、設定変更 > マイホーム最新情報表示変更 から「表示する」を選択して設定変更
 
 ## 実行手順
 - const.rbをテキストエディタで開き、以下の3箇所を適切に設定
-  - $login_mail
-  - $login_pass
-  - $base_url
+  - `$login_mail`
+  - `$login_pass`
+  - `$base_url`
+- 必要であれば、const.rbの以下も項目も変更
+  - `$traverse_start_index`
+  - `$traverse_end_index`
+    - 保存範囲の設定
+    - 「最新日記一覧」「トピック一覧」のページ数を現している
+      - 初期ページが1
+      - それ以降はurl上に出る`page=`の数値）
+  - `$default_sleep_time`
 - このプロジェクトのディレクトリをコマンドプトンプトで開き、以下のコマンドを実行
-  - ruby social_park_diary.rb
+  - [日記を取得する場合] `ruby social_park_diary.rb`
+  - [トピックを取得する場合] `ruby social_park_topic.rb`
 
 ## ありがとうそーしゃるぱーく
