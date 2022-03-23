@@ -41,7 +41,7 @@
   - `$traverse_start_index`
   - `$traverse_end_index`
     - 保存範囲の設定
-    - 「最新日記一覧」「トピック一覧」のページ数を現している
+    - 「最新日記一覧」「トピック一覧」のページ数を表している
       - 初期ページが1
       - それ以降はurl上に出る`page=`の数値）
   - `$default_sleep_time`
