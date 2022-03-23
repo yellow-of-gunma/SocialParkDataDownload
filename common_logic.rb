@@ -84,4 +84,6 @@ def login_social_park(driver)
     driver.find_element(:id, 'username').send_keys $login_mail
     driver.find_element(:id, 'password').send_keys $login_pass
     driver.find_element(:id, 'buttonLogin').click
+
+    on_open_new_page(driver)
 end
