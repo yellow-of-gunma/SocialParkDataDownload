@@ -33,6 +33,6 @@
   - $login_pass
   - $base_url
 - このプロジェクトのディレクトリをコマンドプトンプトで開き、以下のコマンドを実行
-  - ruby socialParkDiary.rb
+  - ruby social_park_diary.rb
 
 ## ありがとうそーしゃるぱーく
