@@ -1,71 +1,6 @@
-require 'open-uri'
 require 'nokogiri'
-require 'uri'
-require 'kconv'
-require "rubygems"
 require "csv"
-require 'selenium-webdriver'
-
-# ログイン情報
-$login_mail = 'ここにメールアドレスを入力'
-$login_pass = 'ここにパスワードを入力'
-$base_url = 'http://ここにドメインを入力.sns-park.com/'
-
-# 一覧の何ページ目から何ページ目までを取得するか
-# (1-index, closed interval)
-traverse_start_index = 1
-traverse_end_index = 1000000000
-
-# 状況出力
-def print_log(text)
-    puts "\n" + text + "\n\n"
-end
-
-# windowリサイズ
-# ページが読み込めているかの判定＆ページが読み込めるまでのwaitにも利用
-def on_open_new_page(driver)
-    sleepTime = 0.5
-    sleep sleepTime
-
-    # 一旦Windowサイズを小さめに変更
-    driver.manage.window.resize_to(100, 100)
-    begin
-        # 実際のページサイズを取得
-        width  = driver.execute_script("return Math.max(document.body.scrollWidth, document.body.offsetWidth, document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);")
-        height = driver.execute_script("return Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);")
-    rescue
-        # sleepが10分を超えるようになったら終了させる
-        if sleepTime > 600
-            print_log("【ERROR】window_resizeのリトライを繰り返しましたが、成功しませんでした")
-            raise
-        end
-
-        # スリープ時間を更新してスリープ
-        sleepTime *= 2
-        sleep sleepTime
-
-        # リトライ
-        retry        
-    end
-    # 取得サイズに若干の余白を持たせてWindowサイズを変更
-    # 若干の余白を持たせることでスクロールバーの表示を無くすことができる
-    driver.manage.window.resize_to(width + 100, height + 100)
-end
-
-# 投稿日時を解析する
-def parse_datetime_text(datetime)
-    yearSplit = datetime.split('年')
-    monthSplit = yearSplit[1].split('月')
-    daySplit = monthSplit[1].split('日')
-    hourSplit = daySplit[1].split(':')
-    return {
-        year: yearSplit[0],
-        month: monthSplit[0],
-        day: daySplit[0],
-        hour: hourSplit[0],
-        minute: hourSplit[1]
-    }
-end
+require "./common_logic.rb"
 
 # ページのhtmlを解析してデータ化する
 def parse_html(doc, current_url)
@@ -159,20 +94,11 @@ def get_filename(data)
     title = data[:title]
     num = data[:comment].length
     user = data[:user]
-    base_filename = id + '_' + date + '_' + title + '(' + num.to_s + ')_' + user
+    base_filename = 'd' + id + '_' + date + '_' + title + '(' + num.to_s + ')_' + user
 
     # ファイルに使用できない文字を削る
     filename = base_filename.gsub(/[\\\/:\*\?"<>\|]/, "")
     return (filename.nil?) ? "" : filename
-end
-
-# 画像のダウンロード
-def download_image(filename, url)
-    File.open(filename, "wb") do |file|
-        URI.open(url) do |img|
-            file.puts img.read
-        end
-    end
 end
 
 # 表示されているページの情報を保存
@@ -186,7 +112,7 @@ def save_data(driver)
     print_log("【INFO】file: " + filename)
 
     # CSV化したデータを出力
-    CSV.open('diary/csv/' + filename + '.csv','w', :force_quotes => true, :encoding => "utf-8") do |writter|
+    CSV.open('diary/csv/' + filename + '.csv','w', :encoding => "utf-8") do |writter|
         # 最初にヘッダー部分を直書き
         writter.puts([
             "number", 
@@ -293,52 +219,8 @@ def traverse(driver)
     end
 end
 
-# WebDriverの生成
-# Chromeをヘッドレス起動
-options = Selenium::WebDriver::Chrome::Options.new(
-  args: ["--headless", "--disable-gpu", "window-size=1280x800"],
-)
-wd = Selenium::WebDriver.for :chrome, options: options
-
-# ログインページを開く
-wd.get ($base_url + '?m=portal&a=page_user_top')
-
-# ログイン
-wd.find_element(:id, 'username').send_keys $login_mail
-wd.find_element(:id, 'password').send_keys $login_pass
-wd.find_element(:id, 'buttonLogin').click
-
-# 最新日記一覧のページに移動
-wd.find_element(:xpath, "//a[contains(@href,'a=page_h_diary_list_all')]").click
-on_open_new_page(wd)
-
-# 一覧を1ページずつめくっていく
-index = 1
-loop do
-    # 取得範囲の終端を迎えたら終了
-    if index > traverse_end_index
-        break
-    end
-
-    # 進捗の表示
-    print_log("【INFO】ListIndex: " + index.to_s + "/" + traverse_end_index.to_s)
-
-    # 取得範囲の先端を迎えていたら、
-    # 表示されているリンクを一通り踏んでデータを取得する
-    if index >= traverse_start_index
-        traverse(wd)
-    end
-
-    # 次のページがあれば遷移し、なければ終了
-    index += 1
-    begin
-        nextElement = wd.find_element(:class, 'next')
-        nextElement.find_element(:tag_name, 'a').click
-        on_open_new_page(wd)
-    rescue
-        break
-    end
+# 一覧ページに遷移する
+def move_to_the_list(driver)
+    driver.find_element(:xpath, "//a[contains(@href,'a=page_h_diary_list_all')]").click
+    on_open_new_page(driver)
 end
-
-# 終了
-wd.quit
