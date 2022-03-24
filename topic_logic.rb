@@ -200,12 +200,8 @@ def traverse(driver)
 
     # リンクの数だけループ
     for i in 0..link_size-1
-        # 2回目以降のループ処理の際にドライバがなくなってるので、再度ドライバ指定
-        events_in_loop = driver.find_elements(:xpath, "//a[contains(@href,'target_c_commu_topic_id=')]")
-
         # 保存したいページに移動
-        events_in_loop[i*2].click
-        on_open_new_page(driver)
+        move_to_target_page(driver, i * 2, "//a[contains(@href,'target_c_commu_topic_id=')]")
 
         # トピックは複数ページに分割されていることがあるので、
         # すべて舐められるようにループ

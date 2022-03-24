@@ -22,9 +22,14 @@ def on_open_new_page(driver)
         # 実際のページサイズを取得
         width  = driver.execute_script("return Math.max(document.body.scrollWidth, document.body.offsetWidth, document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);")
         height = driver.execute_script("return Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);")
+
+        # 取得サイズに若干の余白を持たせてWindowサイズを変更
+        # 若干の余白を持たせることでスクロールバーの表示を無くすことができる
+        driver.manage.window.resize_to(width + 100, height + 100)
     rescue
-        # sleepが10分を超えるようになったら終了させる
-        if sleep_time > 600
+        # sleepが128秒を超えるようになったら終了させる
+        # この時点で合計4分以上はsleepしている
+        if sleep_time > 128
             print_log("【ERROR】window_resizeのリトライを繰り返しましたが、成功しませんでした")
             raise
         end
@@ -36,9 +41,6 @@ def on_open_new_page(driver)
         # リトライ
         retry        
     end
-    # 取得サイズに若干の余白を持たせてWindowサイズを変更
-    # 若干の余白を持たせることでスクロールバーの表示を無くすことができる
-    driver.manage.window.resize_to(width + 100, height + 100)
 end
 
 # 投稿日時を解析する
@@ -85,5 +87,30 @@ def login_social_park(driver)
     driver.find_element(:id, 'password').send_keys $login_pass
     driver.find_element(:id, 'buttonLogin').click
 
+    on_open_new_page(driver)
+end
+
+# 一覧から個別のページに遷移する部分
+def move_to_target_page(driver, index, xpath_pattern)
+    sleep_time = $default_sleep_time
+    begin
+        # 2回目以降のループ処理の際にドライバがなくなってるので、再度ドライバ指定
+        events_in_loop = driver.find_elements(:xpath, xpath_pattern)
+
+        # 保存したいページに移動
+        events_in_loop[index].click
+    rescue
+        # sleepが128秒を超えるようになったら終了させる
+        # この時点で合計4分以上はsleepしている
+        if sleep_time > 128
+            print_log("【ERROR】 events_in_loop[" + index.to_s + "].clickのリトライを繰り返しましたが、成功しませんでした")
+            raise
+        end
+
+        # スリープ時間を更新してスリープ
+        sleep sleep_time
+        sleep_time *= 2
+        retry
+    end
     on_open_new_page(driver)
 end

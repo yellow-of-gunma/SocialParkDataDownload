@@ -28,12 +28,23 @@ def main()
 
         # 次のページがあれば遷移し、なければ終了
         index += 1
+        sleep_time = $default_sleep_time
         begin
             nextElement = driver.find_element(:class, 'next')
             nextElement.find_element(:tag_name, 'a').click
             on_open_new_page(driver)
         rescue
-            break
+            # sleepが128秒を超えるようになったら終了させる
+            # この時点で合計4分以上はsleepしている
+            if sleep_time > 128
+                print_log("【WARN】 次のページがありません")
+                break
+            end
+
+            # スリープ時間を更新してスリープ
+            sleep sleep_time
+            sleep_time *= 2
+            retry
         end
     end
 
