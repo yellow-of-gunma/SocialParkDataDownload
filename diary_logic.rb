@@ -59,7 +59,8 @@ def parse_html(doc)
             comment_data[:id] = comment_heading.content.split("\n")[0].slice(0..-2)
 
             # 投稿者
-            comment_data[:user] = comment_heading.content.split("\n")[1].slice(1..-1)
+            _tmp_user_name_array = comment_heading.content.split("\n")
+            comment_data[:user] = _tmp_user_name_array.length < 2 ? "" : _tmp_user_name_array[1].slice(1..-1)
 
             # 投稿日時
             comment_data[:date] = parse_datetime_text(comm.css('dt')[0].content)
