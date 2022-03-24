@@ -9,4 +9,4 @@ $traverse_start_index = 1
 $traverse_end_index = 100000000
 
 # 1ページ進むごとにおこなうsleep時間
-$default_sleep_time = 0.5
+$default_sleep_time = 1
