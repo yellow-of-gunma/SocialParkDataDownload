@@ -25,8 +25,8 @@
   - `gem install nokogiri`
   - `gem install selenium-webdriver`
   - `gem install ffi`
-- このプロジェクトのディレクトリに`diary`フォルダと`topic`フォルダを作成
-- `diary` `topic`の両フォルダの下にそれぞれ`asset` `csv` `screenshot`の3つのフォルダを作成
+- このプロジェクトのディレクトリに`diary`フォルダと`topic`フォルダと`member`フォルダを作成
+- `diary` `topic` `member`の各フォルダの下にそれぞれ`asset` `csv` `screenshot`の3つのフォルダを作成
 
 ## そーしゃるぱーく上での準備
 - マイホームに「全体の最新コミュニティ書き込み」が表示されていることを確認
