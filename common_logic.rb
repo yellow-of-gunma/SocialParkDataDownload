@@ -57,6 +57,15 @@ def parse_datetime_text(datetime)
         minute: hour_split[1]
     }
 end
+def parse_date_text(datetime)
+    year_split = datetime.split('年')
+    month_split = year_split[1].split('月')
+    return {
+        year: year_split[0],
+        month: month_split[0],
+        day: month_split[1].split('日')[0]
+    }
+end
 
 # 画像のダウンロード
 def download_image(filename, url)
