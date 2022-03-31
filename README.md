@@ -2,7 +2,7 @@
 - 2022/3/31にそーしゃるぱーくがサービスを終了するので作りました
 
 ## 概要
-- そーしゃるぱーくのSNS上から、日記とトピックとメンバー自己紹介のデータを全部ローカルに保存します
+- そーしゃるぱーくのSNS上から、日記とトピックとメンバー自己紹介とコミュニティ説明文のデータを全部ローカルに保存します
   - 対象ページ1つにつき以下の3つがローカルに生成されます
     - csv化されたデータ
     - 画面のスクリーンショット
@@ -25,8 +25,8 @@
   - `gem install nokogiri`
   - `gem install selenium-webdriver`
   - `gem install ffi`
-- このプロジェクトのディレクトリに`diary`フォルダと`topic`フォルダと`member`フォルダを作成
-- `diary` `topic` `member`の各フォルダの下にそれぞれ`asset` `csv` `screenshot`の3つのフォルダを作成
+- このプロジェクトのディレクトリに`diary` `topic` `member` `community`の4つのフォルダを作成
+- `diary` `topic` `member` `community`の各フォルダの下にそれぞれ`asset` `csv` `screenshot`の3つのフォルダを作成
 
 ## そーしゃるぱーく上での準備
 - マイホームに「全体の最新コミュニティ書き込み」が表示されていることを確認
@@ -52,6 +52,7 @@
   - [日記を取得する場合] `ruby social_park_diary.rb`
   - [トピックを取得する場合] `ruby social_park_topic.rb`
   - [自己紹介を取得する場合] `ruby social_park_member.rb`
+  - [コミュニティ紹介文を取得する場合] `ruby social_park_community.rb`
     - 自己紹介はサイトによって項目名・項目内容が異なるため、以下のメソッドを要編集のこと
       - member_logic.rb#parse_main_html
       - member_logic.rb#save_main
